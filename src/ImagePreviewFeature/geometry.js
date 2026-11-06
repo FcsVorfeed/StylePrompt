@@ -2,7 +2,7 @@
 // 优先选择缩略图周围能放下最大完整图片的区域，所有结果都限制在视口内。
 export function GetPreviewBounds(anchor, image, viewport) {
   const margin = Math.min(12, viewport.width / 4, viewport.height / 4);
-  const gap = 16;
+  const gap = 0;
   const maxWidth = Math.min(440, viewport.width - margin * 2);
   const maxHeight = Math.min(640, viewport.height * .8, viewport.height - margin * 2);
   const regions = [
@@ -44,6 +44,7 @@ export function GetPreviewBounds(anchor, image, viewport) {
     left: Math.max(margin, Math.min(left, viewport.width - margin - best.width)),
     top: Math.max(margin, Math.min(top, viewport.height - margin - best.height)),
     width: best.width,
-    height: best.height
+    height: best.height,
+    side: best.side
   };
 }

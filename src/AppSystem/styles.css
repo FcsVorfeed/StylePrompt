@@ -271,6 +271,33 @@ button, input, textarea {
   object-fit: contain;
 }
 
+/* 入场只改变透明度和缩放，原图布局与点击区域保持稳定。 */
+.image-preview:not([hidden]), .image-viewer[open] {
+  animation: preview-enter 160ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.image-viewer[open]::backdrop {
+  animation: preview-backdrop-enter 160ms ease-out both;
+}
+
+@keyframes preview-enter {
+  from {
+    opacity: 0;
+    transform: scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes preview-backdrop-enter {
+  from { opacity: 0; }
+
+  to { opacity: 1; }
+}
+
 .image-viewer {
   width: min(960px, calc(100% - 32px));
   padding: 20px;
@@ -629,7 +656,7 @@ input::placeholder, textarea::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *, *::before, *::after, *::backdrop {
     animation: none !important;
     transition: none !important;
   }

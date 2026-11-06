@@ -78,7 +78,7 @@ export class ImagePreview {
   PlayDelay(button, url, image) {
     this.Hide();
     this.#target = button;
-    this.#timer = setTimeout(() => this.ShowHover(button, url, image), 300);
+    this.#timer = setTimeout(() => this.ShowHover(button, url, image), 100);
   }
 
   // ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -103,6 +103,8 @@ export class ImagePreview {
 
     for (const name of ['left', 'top', 'width', 'height']) this.#layer.style[name] = `${bounds[name]}px`;
 
+    // 缩放以贴近缩略图的一侧为起点，入场期间也不拉开边缘间距。
+    this.#layer.style.transformOrigin = { right: 'left center', left: 'right center', bottom: 'center top', top: 'center bottom', center: 'center' }[bounds.side];
     this.#layer.hidden = false;
   }
 
