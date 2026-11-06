@@ -181,7 +181,7 @@ button, input, textarea {
 .photo {
   position: relative;
   min-width: 0;
-  flex: calc(var(--ratio) * 100) 1 0;
+  flex: 0 0 calc((100% - var(--row-space)) * var(--share));
   aspect-ratio: var(--ratio);
   overflow: hidden;
 }
@@ -201,11 +201,10 @@ button, input, textarea {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform .36s cubic-bezier(.2,.7,.2,1), filter .36s;
+  transition: filter .2s;
 }
 
 .copy-photo:hover img {
-  transform: scale(1.025);
   filter: brightness(1.025);
 }
 
@@ -213,13 +212,13 @@ button, input, textarea {
   outline-offset: -4px;
 }
 
-.edit-photo {
+.edit-photo, .preview-photo {
   position: absolute;
-  right: min(10px, 5%);
-  bottom: min(10px, 5%);
-  width: min(36px, 90%);
-  height: min(36px, 90%);
-  padding: min(8px, 15%);
+  width: min(36px, 42%);
+  height: auto;
+  max-height: 90%;
+  aspect-ratio: 1;
+  padding: min(6px, 5%);
   color: #fff;
   background: #00000080;
   backdrop-filter: blur(8px);
@@ -228,19 +227,64 @@ button, input, textarea {
   transition: opacity .2s, transform .2s, background .2s;
 }
 
-.edit-photo svg {
+.edit-photo {
+  right: min(10px, 5%);
+  bottom: min(10px, 5%);
+}
+
+.preview-photo {
+  left: min(10px, 5%);
+  top: min(10px, 5%);
+}
+
+.edit-photo svg, .preview-photo svg {
   width: 100%;
   height: 100%;
 }
 
-.photo:hover .edit-photo, .photo:focus-within .edit-photo {
+.photo:hover .edit-photo, .photo:focus-within .edit-photo,
+.photo:hover .preview-photo, .photo:focus-within .preview-photo {
   opacity: 1;
   transform: none;
 }
 
-.edit-photo:hover {
+.edit-photo:hover, .preview-photo:hover {
   color: #fff;
   background: #000000c4;
+}
+
+.image-preview {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid #d5d5d5;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 40px #00000024;
+}
+
+.image-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.image-viewer {
+  width: min(960px, calc(100% - 32px));
+  padding: 20px;
+}
+
+.image-viewer .dialog-header {
+  margin-bottom: 12px;
+}
+
+.image-viewer > img {
+  display: block;
+  width: 100%;
+  height: min(720px, calc(100dvh - 160px));
+  object-fit: contain;
 }
 
 .image-unavailable {
@@ -551,7 +595,7 @@ input::placeholder, textarea::placeholder {
 }
 
 @media (hover: none) {
-  .edit-photo, .image-controls {
+  .edit-photo, .preview-photo, .image-controls {
     opacity: 1;
     transform: none;
   }

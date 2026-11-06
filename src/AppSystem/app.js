@@ -3,6 +3,7 @@ import { ShowGallery } from '../GalleryFeature/gallery.js';
 import { EntryEditor } from '../EditorFeature/editor.js';
 import { GetIcon } from './icons.js';
 import { BrowserPreferences } from '../BrowserStorageSystem/preferences.js';
+import { ImagePreview } from '../ImagePreviewFeature/preview.js';
 
 // 当前会话与快照保留在内存；仅用户勾选记住时才持久保存经过验证的凭证。
 let store = null;
@@ -15,6 +16,9 @@ let connectionToken = '';
 
 // 本地凭证与显示偏好使用独立键，退出编辑不影响卡片大小。
 const preferences = new BrowserPreferences();
+
+// 全页面复用一个预览层，避免每张图片各自创建窗口与全局事件。
+const imagePreview = new ImagePreview();
 
 // DOM 引用与编辑器归属本应用模块，不挂载到 window。
 const settings = document.querySelector('#settings-dialog');
@@ -79,7 +83,7 @@ function ShowCurrentGallery() {
   document.querySelector('#empty-state').hidden = true;
 
   if (store && snapshot) {
-    ShowGallery(document.querySelector('#gallery'), snapshot, store, SetClipboard, entry => { if (!loading) editor.Show(store, entry, snapshot.head); });
+    ShowGallery(document.querySelector('#gallery'), snapshot, store, SetClipboard, entry => { if (!loading) editor.Show(store, entry, snapshot.head); }, imagePreview);
 
     if (!snapshot.catalog.entries.length) {
       ShowEmpty(store.IsEditing() ? '从第一组图片开始。' : '这里还没有收藏。');
@@ -133,6 +137,7 @@ async function Init() {
   sizeSlider.addEventListener('input', () => {
     const size = Number(sizeSlider.value);
 
+    imagePreview.Hide();
     sizeSlider.setAttribute('aria-valuetext', `${size}%`);
     document.querySelector('#gallery').style.setProperty('--gallery-scale', size / 100);
 

@@ -4,7 +4,7 @@ import { GitHubStore } from '../src/GitHubSystem/github.js';
 const nativeFetch = window.fetch.bind(window);
 const fixtureEntries = [
   { count: 1, width: 800, height: 1000 },
-  { count: 3, width: 450, height: 800 },
+  { count: 4, width: 450, height: 800 },
   { count: 1, width: 700, height: 1000 },
   { count: 2, width: 1000, height: 700 }
 ].map((group, index) => ({
