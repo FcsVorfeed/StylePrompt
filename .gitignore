@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+bin/
+obj/
+target/
+*.log
+.DS_Store
+Thumbs.db
+
+# Public-boundary safety net.
+# 公开边界保险：这些文件不应进入公开主仓库。
+.env
+.env.*
+
+/.agents/
+/.codex/
+/private/
