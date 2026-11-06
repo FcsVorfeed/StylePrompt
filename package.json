@@ -1,0 +1,12 @@
+{
+  "name": "style-prompt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/PreviewSystem/server.mjs",
+    "build": "node scripts/BuildSystem/build.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
