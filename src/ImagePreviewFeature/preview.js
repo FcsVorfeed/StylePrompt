@@ -18,6 +18,10 @@ export class ImagePreview {
   #target = null;
   #request = 0;
 
+  // 退场独立于加载请求，切换目标时可取消，避免旧回调隐藏新图。
+  #exitAnimation = null;
+  #dialogTimer = null;
+
   // ────────────────────────────────────────────────────────────────────────────────────────────────────
   // 全局取消事件只清理悬停层，不影响弹窗、滚动位置或原图的点击语义。
   constructor() {
@@ -39,7 +43,7 @@ export class ImagePreview {
     close.className = 'icon-button';
     close.setAttribute('aria-label', '关闭图片预览');
     close.innerHTML = GetIcon('close');
-    close.addEventListener('click', () => this.#dialog.close());
+    close.addEventListener('click', () => this.HideDialog());
     this.#error.className = 'error-message';
     this.#error.textContent = '图片暂时无法加载，请关闭后重试。';
     this.#error.hidden = true;
@@ -51,10 +55,18 @@ export class ImagePreview {
     });
     header.append(title, close);
     this.#dialog.append(header, this.#dialogImage, this.#error);
-    this.#dialog.addEventListener('click', event => { if (event.target === this.#dialog) this.#dialog.close(); });
+    this.#dialog.addEventListener('click', event => { if (event.target === this.#dialog) this.HideDialog(); });
+    this.#dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      this.HideDialog();
+    });
+    this.#dialog.addEventListener('close', () => {
+      clearTimeout(this.#dialogTimer);
+      this.#dialog.classList.remove('is-closing');
+    });
     document.body.append(this.#layer, this.#dialog);
 
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') this.Hide(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') this.Hide(true); });
     document.addEventListener('pointerdown', () => this.Hide(), true);
     document.addEventListener('scroll', () => this.Hide(), true);
     window.addEventListener('resize', () => this.Hide());
@@ -68,9 +80,9 @@ export class ImagePreview {
     button.addEventListener('pointerenter', event => {
       if (event.pointerType === 'mouse' && matchMedia('(hover: hover) and (pointer: fine)').matches) this.PlayDelay(button, url, image);
     });
-    button.addEventListener('pointerleave', () => { if (this.#target === button) this.Hide(); });
+    button.addEventListener('pointerleave', () => { if (this.#target === button) this.Hide(true); });
     button.addEventListener('focus', () => { if (button.matches(':focus-visible')) this.PlayDelay(button, url, image); });
-    button.addEventListener('blur', () => { if (this.#target === button) this.Hide(); });
+    button.addEventListener('blur', () => { if (this.#target === button) this.Hide(true); });
   }
 
   // ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -109,18 +121,58 @@ export class ImagePreview {
   }
 
   // ────────────────────────────────────────────────────────────────────────────────────────────────────
-  // 浮层隐藏不改变缩略图，Esc 后需要重新进入图片才会再次出现。
-  Hide() {
+  // 移开时从当前帧淡出；切换图片、滚动和点击时立即清理，不影响命中与排版。
+  Hide(animate = false) {
     clearTimeout(this.#timer);
     this.#request++;
     this.#target = null;
+
+    if (animate && !this.#layer.hidden && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (this.#exitAnimation) return;
+
+      // 固定当前缩放并从实际透明度退场，打断入场也不会先跳回完全可见。
+      const style = getComputedStyle(this.#layer);
+      const animation = this.#layer.animate([
+        { opacity: style.opacity, transform: style.transform },
+        { opacity: 0, transform: style.transform }
+      ], { duration: 180, easing: 'ease-out', fill: 'forwards' });
+
+      this.#exitAnimation = animation;
+      animation.finished.then(() => { if (this.#exitAnimation === animation) this.Hide(); }).catch(() => {});
+      return;
+    }
+
+    this.#exitAnimation?.cancel();
+    this.#exitAnimation = null;
     this.#layer.hidden = true;
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────────────────────────────
+  // 保留原生模态框到退场结束，再关闭并恢复焦点；重复关闭不延长动画。
+  HideDialog() {
+    if (!this.#dialog.open || this.#dialog.classList.contains('is-closing')) return;
+
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.#dialog.close();
+      return;
+    }
+
+    // 弹窗和遮罩各自从当前透明度淡出，快速关闭也保持连续。
+    const style = getComputedStyle(this.#dialog);
+
+    this.#dialog.style.setProperty('--preview-exit-opacity', style.opacity);
+    this.#dialog.style.setProperty('--preview-exit-transform', style.transform);
+    this.#dialog.style.setProperty('--backdrop-exit-opacity', getComputedStyle(this.#dialog, '::backdrop').opacity);
+    this.#dialog.classList.add('is-closing');
+    this.#dialogTimer = setTimeout(() => this.#dialog.close(), 180);
   }
 
   // ────────────────────────────────────────────────────────────────────────────────────────────────────
   // 按钮预览只查看图片，原生 dialog 提供焦点约束、Esc 和关闭后焦点恢复。
   ShowDialog(url) {
     this.Hide();
+    clearTimeout(this.#dialogTimer);
+    this.#dialog.classList.remove('is-closing');
     this.#error.hidden = true;
     this.#dialogImage.hidden = false;
     this.#dialogImage.src = url;
