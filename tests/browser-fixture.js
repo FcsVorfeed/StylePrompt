@@ -4,7 +4,7 @@ import { GitHubStore } from '../src/GitHubSystem/github.js';
 const nativeFetch = window.fetch.bind(window);
 const fixtureEntries = [
   { count: 1, width: 800, height: 1000 },
-  { count: 3, width: 800, height: 1000 },
+  { count: 3, width: 450, height: 800 },
   { count: 1, width: 700, height: 1000 },
   { count: 2, width: 1000, height: 700 }
 ].map((group, index) => ({
@@ -18,7 +18,8 @@ const fixtureEntries = [
 }));
 let catalog = JSON.parse(sessionStorage.getItem('qa-catalog') || 'null') || { version: 1, entries: fixtureEntries };
 let nextCatalog = catalog;
-let networkFailure = false;
+let networkFailure = sessionStorage.getItem('qa-network-failure') === 'true';
+let tokenInvalid = sessionStorage.getItem('qa-token-invalid') === 'true';
 let copyFailure = false;
 let commitNumber = 1;
 
@@ -46,6 +47,7 @@ window.fetch = async function GetFixtureResponse(input, init = {}) {
   const authorized = init.headers?.Authorization === 'Bearer TEST_ONLY';
   let value = {};
 
+  if (init.headers?.Authorization && tokenInvalid) return new Response('{}', { status: 401 });
   if (init.method !== 'GET' && !authorized) return new Response('{}', { status: 403 });
 
   if (path === '') value = { private: false, permissions: { push: authorized } };
@@ -75,7 +77,16 @@ panel.style.cssText = 'padding:8px 18px;background:#edf0e6;font:12px system-ui;c
 panel.textContent = '本地交互验收 · 合成图片 · 不连接 GitHub';
 
 for (const [label, action] of [
-  ['模拟网络故障', event => { networkFailure = !networkFailure; event.target.textContent = networkFailure ? '恢复网络' : '模拟网络故障'; }],
+  [networkFailure ? '恢复网络' : '模拟网络故障', event => {
+    networkFailure = !networkFailure;
+    sessionStorage.setItem('qa-network-failure', String(networkFailure));
+    event.target.textContent = networkFailure ? '恢复网络' : '模拟网络故障';
+  }],
+  [tokenInvalid ? '恢复测试凭证' : '模拟凭证失效', event => {
+    tokenInvalid = !tokenInvalid;
+    sessionStorage.setItem('qa-token-invalid', String(tokenInvalid));
+    event.target.textContent = tokenInvalid ? '恢复测试凭证' : '模拟凭证失效';
+  }],
   ['模拟复制受限', event => { copyFailure = !copyFailure; event.target.textContent = copyFailure ? '恢复复制' : '模拟复制受限'; }]
 ]) {
   const button = document.createElement('button');

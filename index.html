@@ -19,6 +19,11 @@
           <span aria-hidden="true">＋</span>
         </button>
         <div class="toolbar-spacer"></div>
+        <div class="size-control" title="卡片大小">
+          <span aria-hidden="true">−</span>
+          <input id="gallery-size" type="range" min="40" max="140" step="5" value="70" aria-label="卡片大小" aria-valuetext="70%">
+          <span aria-hidden="true">＋</span>
+        </div>
         <button id="refresh-gallery" class="icon-button" aria-label="刷新收藏" title="刷新收藏"></button>
         <button id="open-settings" class="icon-button" aria-label="仓库与编辑权限" title="仓库与编辑权限"></button>
       </header>
@@ -38,9 +43,10 @@
         </header>
         <label for="repository">GitHub 仓库</label>
         <input id="repository" name="repository" placeholder="owner/repository" autocomplete="off" spellcheck="false" required>
-        <label for="access-token">编辑凭证 <span class="optional">可留空，只浏览</span></label>
+        <label for="access-token">编辑凭证 <span id="token-mode-note" class="optional">可留空，只浏览</span></label>
         <input id="access-token" type="password" name="access-token" autocomplete="off" placeholder="Fine-grained personal access token" spellcheck="false">
-        <p class="field-note">仅授权此仓库的 Contents 读写权限。凭证只在当前页面有效。</p>
+        <label class="remember-option"><input id="remember-browser" type="checkbox" checked>记住此浏览器</label>
+        <p class="field-note">仅授权此仓库的 Contents 读写权限。在自己的设备上记住凭证。</p>
         <p id="settings-error" class="error-message" role="alert"></p>
         <footer class="dialog-footer">
           <button id="logout" type="button" class="text-button" hidden>退出编辑</button>

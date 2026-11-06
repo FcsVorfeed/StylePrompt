@@ -4,7 +4,7 @@ import { GetCatalog, GetMergedCatalog, GetRepository } from './catalog.js';
 export const dataBranch = 'gallery-data';
 
 // ────────────────────────────────────────────────────────────────────────────────────────────────────
-// GitHub 是最终权限边界；凭证为私有字段，不进入 URL、存储、日志或部署产物。
+// GitHub 是最终权限边界；会话凭证不进入 URL、日志或部署产物，本地记忆由独立模块管理。
 export class GitHubStore {
   #token;
   #repository;

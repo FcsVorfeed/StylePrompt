@@ -10,7 +10,6 @@ export function ShowGallery(container, snapshot, store, OnCopy, OnEdit) {
     const weight = entry.images.slice(0, 3).reduce((sum, image) => sum + Math.min(2.5, Math.max(0.45, image.width / image.height)), 0);
 
     card.className = 'collection';
-    card.style.setProperty('--weight', Math.min(3, weight));
     card.style.setProperty('--basis', `${Math.max(200, Math.min(660, weight * 190))}px`);
     card.setAttribute('aria-label', '一组图片与提示词');
 

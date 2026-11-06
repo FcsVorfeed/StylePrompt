@@ -64,6 +64,34 @@ button, input, textarea {
   flex: 1;
 }
 
+.size-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+#gallery-size {
+  width: 120px;
+  height: 28px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.remember-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remember-option input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .toolbar:has(.add-slot:not([hidden])) .toolbar-spacer {
   display: none;
 }
@@ -111,6 +139,7 @@ button, input, textarea {
 }
 
 .gallery {
+  --gallery-scale: .7;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -118,7 +147,7 @@ button, input, textarea {
 }
 
 .collection {
-  flex: var(--weight) 1 var(--basis);
+  flex: 0 1 calc(var(--basis) * var(--gallery-scale));
   max-width: 100%;
   min-width: 0;
   padding: 6px;
@@ -127,10 +156,6 @@ button, input, textarea {
   overflow: hidden;
   background: #ffffff;
   animation: appear .32s ease both;
-}
-
-.collection:last-child {
-  flex-grow: 0;
 }
 
 .collection-row {
@@ -190,14 +215,22 @@ button, input, textarea {
 
 .edit-photo {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: min(10px, 5%);
+  bottom: min(10px, 5%);
+  width: min(36px, 90%);
+  height: min(36px, 90%);
+  padding: min(8px, 15%);
   color: #fff;
   background: #00000080;
   backdrop-filter: blur(8px);
   opacity: 0;
   transform: translateY(3px);
   transition: opacity .2s, transform .2s, background .2s;
+}
+
+.edit-photo svg {
+  width: 100%;
+  height: 100%;
 }
 
 .photo:hover .edit-photo, .photo:focus-within .edit-photo {
@@ -297,7 +330,7 @@ label {
   margin: 18px 0 9px;
 }
 
-input:not([type="file"]), textarea {
+input:not([type="file"]):not([type="range"]):not([type="checkbox"]), textarea {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--line);
@@ -540,8 +573,8 @@ input::placeholder, textarea::placeholder {
   .gallery {
     gap: 16px;
   }
-  .collection {
-    flex-basis: 100%;
+  #gallery-size {
+    width: 80px;
   }
   dialog {
     padding: 20px;
